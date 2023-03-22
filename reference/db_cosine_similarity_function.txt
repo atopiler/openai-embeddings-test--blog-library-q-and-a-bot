@@ -1,0 +1,36 @@
+//calculates the similarity of the search query coming in and the embedding of various chunks
+
+create or replace function paul_graham_search (
+  query_embedding vector(1536),
+  similarity_threshold float,
+  match_count int
+)
+
+returns table (
+  id bigint,
+  essay_title text,
+  essay_url text,
+  essay_date text,
+  content text,
+  content_tokens bigint,
+  similarity float
+)
+
+language plpgsql
+as $$ 
+begin
+  return query
+  select 
+    paul_graham_essays.id,
+    paul_graham_essays.essay_title,
+    paul_graham_essays.essay_url,
+    paul_graham_essays.essay_date,
+    paul_graham_essays.content,
+    paul_graham_essays.content_tokens,
+    1 - (paul_graham_essays.embedding <=> query_embedding) as similarity
+  from paul_graham_essays
+  where 1 - (paul_graham_essays.embedding <=> query_embedding) > similarity_threshold
+  order by paul_graham_essays.embedding <=> query_embedding
+  limit match_count;
+end;
+$$;
