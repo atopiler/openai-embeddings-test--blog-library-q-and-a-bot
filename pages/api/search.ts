@@ -30,16 +30,14 @@ const handler = async (req: Request): Promise<Response> => {
       "paul_graham_search",
       {
         query_embedding: embedding,
-        //the higher, the more strict the search
         similarity_threshold: .5,
-        march_count: 5
+        match_count: 5
       }
     );
     
     return new Response(JSON.stringify(chunks), {status: 200});
 
   } catch (e) {
-    console.log(error);
     return new Response("Error", {status:500});
   }
 }
